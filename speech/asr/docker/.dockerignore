@@ -1,0 +1,13 @@
+# Exclude everything by default
+**
+
+# Allow the asr folder and its contents
+!speech/asr/
+!speech/asr/**
+
+# Allow cv-valid-dev folder and its contents
+!speech/common_voice/cv-valid-dev/
+!speech/common_voice/cv-valid-dev/**
+
+# Allow cv-valid-dev.csv file
+!speech/common_voice/cv-valid-dev.csv
