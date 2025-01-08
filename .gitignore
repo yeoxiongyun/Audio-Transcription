@@ -1,0 +1,30 @@
+# Ignore all macOS system files
+*.DS_Store
+
+# Ignore all text files
+*.txt
+
+# Ignore Python bytecode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore build artifacts
+build/
+dist/
+*.egg-info/
+
+# Ignore local environment settings or API keys
+.env
+
+# Ignore IDE settings
+.vscode/
+.idea/
+
+# Ignore mp3 files
+*.mp3
