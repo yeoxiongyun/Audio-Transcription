@@ -72,7 +72,7 @@ speech/
 │   │   ├── Dockerfile
 │   ├── model
 ├── asr-train
-├── common-voice
+├── common_voice
 ├── ...
 ```
 
