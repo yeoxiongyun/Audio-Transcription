@@ -30,4 +30,4 @@ dist/
 *.mp3
 
 # Ignore models
-.safetensors
+*.safetensors
