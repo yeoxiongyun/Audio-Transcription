@@ -35,7 +35,7 @@ def load_audio(file_path: str, target_sr: int = 16000) -> tuple[torch.Tensor, in
         return torch.tensor(samples).unsqueeze(0), target_sr
     except Exception as e:
         print(f'Error loading {file_path}: {e}')
-        return None, None
+        return torch.tensor([]), 0
 
 def preprocess_audio(file_path: str, target_sr: int = 16000, mono: bool = True, silence_threshold: float = -30.0, high_pass_freq: int = 50) -> str:
     '''
@@ -69,7 +69,7 @@ def preprocess_audio(file_path: str, target_sr: int = 16000, mono: bool = True, 
         audio = audio.apply_gain(-audio.dBFS)
 
         # Trim leading and trailing silence based on the silence threshold
-        audio = audio.strip_silence(silence_threshold)
+        audio = audio.strip_silence(silence_threshold=silence_threshold)
 
         # Apply high-pass filters to remove unwanted frequency noise
         audio = audio.high_pass_filter(high_pass_freq)
@@ -82,9 +82,8 @@ def preprocess_audio(file_path: str, target_sr: int = 16000, mono: bool = True, 
 
         return new_file_path
     except Exception as e:
-        # Log and return None if an error occurs
         print(f'Error processing {file_path}: {e}')
-        return None
+        return file_path
 
 
 # Extract audio features
@@ -110,26 +109,20 @@ def extract_audio_features(file_path: str, target_sr: int = 16000) -> dict:
         return {
             'duration': librosa.get_duration(y=y, sr=sr),                               # Total duration of the audio in seconds
             'mfccs': librosa.feature.mfcc(y=y, sr=sr).mean(axis=1),                     # Mean MFCCs values across time
-            'spectral_centroid': librosa.feature.spectral_centroid(y=y, sr=sr).mean(),  # Mean spectral centroid
             'energy': np.sum(y**2),                                                     # Sum of squared values (energy of the signal)
             'zero_crossing_rate': librosa.feature.zero_crossing_rate(y).mean(),         # Mean zero-crossing rate
-            'spectral_bandwidth': librosa.feature.spectral_bandwidth(y=y, sr=sr).mean(),# Mean spectral bandwidth
-            'spectral_contrast': librosa.feature.spectral_contrast(y=y, sr=sr).mean(),  # Mean spectral contrast
-            'spectral_rolloff': librosa.feature.spectral_rolloff(y=y, sr=sr).mean(),    # Mean spectral rolloff
-            'chroma_stft': librosa.feature.chroma_stft(y=y, sr=sr).mean(axis=1)         # Mean chroma feature values
+            # 'spectral_centroid': librosa.feature.spectral_centroid(y=y, sr=sr).mean(),  # Mean spectral centroid
+            # 'spectral_bandwidth': librosa.feature.spectral_bandwidth(y=y, sr=sr).mean(),# Mean spectral bandwidth
+            # 'spectral_contrast': librosa.feature.spectral_contrast(y=y, sr=sr).mean(),  # Mean spectral contrast
+            # 'spectral_rolloff': librosa.feature.spectral_rolloff(y=y, sr=sr).mean(),    # Mean spectral rolloff
+            # 'chroma_stft': librosa.feature.chroma_stft(y=y, sr=sr).mean(axis=1)         # Mean chroma feature values
         }
     
     # Return audio values or NaN values if audio cannot be loade
-    return {key: np.nan for key in ['duration', 'mfccs', 'spectral_centroid', 'energy', 
-                                    'zero_crossing_rate', 'spectral_bandwidth', 
-                                    'spectral_contrast', 'spectral_rolloff', 'chroma_stft']}
-
-
-def reduce_reverb(y: np.ndarray, sr: int) -> np.ndarray:
-    # Example: Apply a basic spectral subtraction technique
-    spectrogram = np.abs(librosa.stft(y))
-    reduced_spec = librosa.decompose.nn_filter(spectrogram, aggregate=np.median)
-    return librosa.istft(reduced_spec)
+    return {key: np.nan for key in ['duration', 'mfccs', 'energy', 'zero_crossing_rate', 
+                                    # 'spectral_centroid', 'spectral_bandwidth', 
+                                    # 'spectral_contrast', 'spectral_rolloff', 'chroma_stft'
+                                    ]}
 
 
 # Preprocess entire dataset

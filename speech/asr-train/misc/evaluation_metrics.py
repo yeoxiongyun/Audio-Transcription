@@ -44,20 +44,19 @@ from typing import Dict, Any, List
 normalizer = BasicTextNormalizer()
 wer_metric = load('wer')
 
-
-def compute_wer(reference_texts: List[str], predicted_texts: List[str]) -> float:
+def compute_wer(reference_texts: List[str], predicted_texts: List[str], round_digits: int = 5) -> float:
     '''
     Computes the Word Error Rate (WER) between reference texts and predicted texts.
 
     Args:
         reference_texts (list[str]): The ground truth reference sentences.
         predicted_texts (list[str]): The predicted sentences from the model.
+        round_digits (int): The number of decimal places to round the computed WER.
 
     Returns:
-        float: The WER score as a percentage.
+        float: The WER score as a percentage, rounded to `round_digits` decimal places.
     '''
-    return 100 * wer_metric.compute(references=reference_texts, predictions=predicted_texts)
-
+    return round(100 * wer_metric.compute(references=reference_texts, predictions=predicted_texts), round_digits) # type: ignore
 
 def normalize_texts(texts: List[str], normalizer: BasicTextNormalizer) -> List[str]:
     '''
@@ -139,7 +138,9 @@ all_predictions = ['the quick fox', 'jumped over the dog']
 
 # Compute orthographic WER
 wer_ortho = compute_wer(
-    reference_texts=common_voice_test['sentence'], predicted_texts=all_predictions
+    reference_texts=common_voice_test['sentence'], 
+    predicted_texts=all_predictions, 
+    round_digits=2
 )
 print(f'Orthographic WER: {wer_ortho}%')
 
@@ -150,6 +151,8 @@ all_predictions_norm, all_references_norm = filter_nonzero_references(
     all_predictions_norm, all_references_norm
 )
 normalized_wer = compute_wer(
-    reference_texts=all_references_norm, predicted_texts=all_predictions_norm
+    reference_texts=all_references_norm, 
+    predicted_texts=all_predictions_norm, 
+    round_digits=2
 )
 print(f'Normalized WER: {normalized_wer}%')
