@@ -38,7 +38,12 @@ This code provides functions to compute and evaluate Word Error Rate (WER) metri
 
 from evaluate import load
 from transformers.models.whisper.english_normalizer import BasicTextNormalizer
-from typing import Dict, Any, List
+from typing import Any, Dict, List, Tuple, Optional
+from transformers import AutoProcessor
+import numpy as np
+
+model_dir = '../model'
+processor = AutoProcessor.from_pretrained(model_dir)
 
 # Initialize the text normalizer and WER metric
 normalizer = BasicTextNormalizer()
@@ -108,29 +113,22 @@ def compute_metrics(pred: Any) -> Dict[str, float]:
     Returns:
         dict: A dictionary containing `wer_ortho` and `wer` scores.
     '''
-    pred_ids = pred.predictions
+    pred_logits = pred.predictions
+    pred_ids = np.argmax(pred_logits, axis=-1)
     label_ids = pred.label_ids
 
     # Replace -100 with the pad_token_id
     label_ids[label_ids == -100] = processor.tokenizer.pad_token_id
 
-    # Decode predictions and references
-    pred_str = processor.batch_decode(pred_ids, skip_special_tokens=True)
-    label_str = processor.batch_decode(label_ids, skip_special_tokens=True)
+    # Decode predictions and references (don't group tokens when computing metrics)
+    pred_str = processor.batch_decode(pred_ids)
+    label_str = processor.batch_decode(label_ids, group_tokens=False)
 
     # Compute orthographic WER
-    wer_ortho = compute_wer(label_str, pred_str)
+    wer_metric = load('wer')
+    wer = wer_metric.compute(predictions=pred_str, references=label_str)
 
-    # Compute normalized WER
-    pred_str_norm = normalize_texts(pred_str, normalizer)
-    label_str_norm = normalize_texts(label_str, normalizer)
-    pred_str_norm, label_str_norm = filter_nonzero_references(
-        pred_str_norm, label_str_norm
-    )
-    wer = compute_wer(label_str_norm, pred_str_norm)
-
-    return {'wer_ortho': wer_ortho, 'wer': wer}
-
+    return {'wer': wer}
 
 # Example data for orthographic WER computation
 common_voice_test = {'sentence': ['the quick brown fox', 'jumps over the lazy dog']}
@@ -142,17 +140,19 @@ wer_ortho = compute_wer(
     predicted_texts=all_predictions, 
     round_digits=2
 )
+print(common_voice_test)
+print(all_predictions)
 print(f'Orthographic WER: {wer_ortho}%')
 
-# Compute normalized WER
-all_predictions_norm = normalize_texts(all_predictions, normalizer)
-all_references_norm = normalize_texts(common_voice_test['sentence'], normalizer)
-all_predictions_norm, all_references_norm = filter_nonzero_references(
-    all_predictions_norm, all_references_norm
-)
-normalized_wer = compute_wer(
-    reference_texts=all_references_norm, 
-    predicted_texts=all_predictions_norm, 
-    round_digits=2
-)
-print(f'Normalized WER: {normalized_wer}%')
+# # Compute normalized WER
+# all_predictions_norm = normalize_texts(all_predictions, normalizer)
+# all_references_norm = normalize_texts(common_voice_test['sentence'], normalizer)
+# all_predictions_norm, all_references_norm = filter_nonzero_references(
+#     all_predictions_norm, all_references_norm
+# )
+# normalized_wer = compute_wer(
+#     reference_texts=all_references_norm, 
+#     predicted_texts=all_predictions_norm, 
+#     round_digits=2
+# )
+# print(f'Normalized WER: {normalized_wer}%')
