@@ -31,3 +31,9 @@ dist/
 
 # Ignore models
 *.safetensors
+
+# Ignore TensorBoard log files
+events.out.tfevents.*
+
+# Ignore PyTorch model files
+*.pt
