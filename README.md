@@ -11,17 +11,13 @@ This project provides an Audio Transcription API built with Flask and TensorFlow
 +--------------------+                              +-------------------------+
                                                       |
                                                       v
-                                          +-----------------------------+
-                                          |   Speech Recognition Model  |
-                                          +-----------------------------+
-                                                      |
-                                                      v
-                                           +----------------------------+
-                                           |                            |
-                                           |   Transcription Logic      |
-                                           |   (TensorFlow/Python)      |
-                                           |                            |
-                                           +----------------------------+
+                                           +-----------------------------+
+                                           |   Speech Recognition Model  |
+                                           |                             |
+                                           |   Transcription Logic       |
+                                           |   (TensorFlow/Python)       |
+                                           |                             |
+                                           +-----------------------------+
                                                       |
                                                       v
                                    +---------------------------------------+
